@@ -102,25 +102,25 @@ pub trait IBorrowerOperations {
     address _sortedTrovesAddress,
     address _lusdTokenAddress,
     address _lqtyStakingAddress
-);
+  );
 
-fn open_vault(max_fee: uint, usdm_mount: uint, upper_hint: ContractAddress, lower_hint: ContractAddress);
+  fn open_vault(max_fee: uint, usdm_mount: uint, upper_hint: ContractAddress, lower_hint: ContractAddress);
 
-fn add_coll(upper_hint: ContractAddress, lower_hint: ContractAddress);
+  fn add_coll(upper_hint: ContractAddress, lower_hint: ContractAddress);
 
-fn move_eth_gain_to_vault(user: ContractAddress, upper_hint: ContractAddress, lower_hint: ContractAddress);
+  fn move_eth_gain_to_vault(user: ContractAddress, upper_hint: ContractAddress, lower_hint: ContractAddress);
 
-fn withdraw_coll(amount: u256, upper_hint: ContractAddress, lower_hint: ContractAddress);
+  fn withdraw_coll(amount: u256, upper_hint: ContractAddress, lower_hint: ContractAddress);
 
-fn withdraw_usdm(maxFee: u256, amount: u256, upper_hint: ContractAddress, lower_hint: ContractAddress);
+  fn withdraw_usdm(maxFee: u256, amount: u256, upper_hint: ContractAddress, lower_hint: ContractAddress);
 
-fn repay_usdm(amount: u256, upper_hint: ContractAddress, lower_hint: ContractAddress);
+  fn repay_usdm(amount: u256, upper_hint: ContractAddress, lower_hint: ContractAddress);
 
-fn close_vault();
+  fn close_vault();
 
-fn adjust_vault(max_fee: u256, coll_withdrawal: u256, debt_change: u256, is_debt_increase: bool, upper_hint: ContractAddress, lower_hint: ContractAddress);
+  fn adjust_vault(max_fee: u256, coll_withdrawal: u256, debt_change: u256, is_debt_increase: bool, upper_hint: ContractAddress, lower_hint: ContractAddress);
 
-fn claim_collateral();
+  fn claim_collateral();
 
-fn get_composite_debt(debt u256) -> u256;
+  fn get_composite_debt(debt u256) -> u256;
 }
