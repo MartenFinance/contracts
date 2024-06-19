@@ -48,7 +48,7 @@ pub trait IPool {
 
     fn get_usdm_debt() -> u256;
 
-    fn increase_usdm_debt(amount u256) -> u256;
+    fn increase_usdm_debt(amount: u256) -> u256;
 
-    fn decrease_usdm_debt(amount u256) -> u256;
+    fn decrease_usdm_debt(amount: u256) -> u256;
 }
