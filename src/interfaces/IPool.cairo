@@ -1,35 +1,35 @@
-use starknet::{ContractAddress}
+use starknet::{ContractAddress};
 
 #[starknet::interface]
 pub trait IPool {
     #[derive(starknet::Event, Drop)]
     pub struct ETHBalanceUpdated {
-      pub newBalance: u256
+      pub new_balance: u256
     }
 
     #[derive(starknet::Event, Drop)]
     pub struct USDMBalanceUpdated {
-      pub newBalance: u256
+      pub new_balance: u256
     }
 
     #[derive(starknet::Event, Drop)]
     pub struct ActivePoolAddressChanged {
-      pub newActivePoolAddress: ContractAddress
+      pub new_active_pool_address: ContractAddress
     }
 
     #[derive(starknet::Event, Drop)]
     pub struct DefaultPoolAddressChanged {
-      pub newDefaultPoolAddress: ContractAddress
+      pub new_default_pool_address: ContractAddress
     }
 
     #[derive(starknet::Event, Drop)]
     pub struct StabilityPoolAddressChanged {
-      pub newStabilityPoolAddress: ContractAddress
+      pub new_stability_pool_address: ContractAddress
     }
 
     #[derive(starknet::Event, Drop)]
     pub struct EtherSent {
-      pub to: ContractAddress
+      pub to: ContractAddress,
       pub amount: u256
     }
 

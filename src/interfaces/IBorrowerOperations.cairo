@@ -1,55 +1,55 @@
-use starknet::{ContractAddress}
+use starknet::{ContractAddress};
 
 #[starknet::interface]
 pub trait IBorrowerOperations {
   #[derive(starknet::Event, Drop)]
   pub struct VaultManagerAddressChanged {
-    pub newVaultManagerAddress: ContractAddress
+    pub new_vault_manager_address: ContractAddress
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct ActivePoolAddressChanged {
-    pub activePoolAddress: ContractAddress
+    pub active_pool_address: ContractAddress
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct DefaultPoolAddressChanged {
-    pub defaultPoolAddress: ContractAddress
+    pub default_pool_address: ContractAddress
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct StabilityPoolAddressChanged {
-    pub stabilityPoolAddress: ContractAddress
+    pub stability_pool_address: ContractAddress
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct GasPoolAddressChanged {
-    pub gasPoolAddress: ContractAddress
+    pub gas_pool_address: ContractAddress
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct CollSurplusPoolAddressChanged {
-    pub collSurplusPoolAddress: ContractAddress
+    pub coll_surplusP_pool_address: ContractAddress
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct PriceFeedAddressChanged {
-    pub newPriceFeedAddress: ContractAddress
+    pub new_price_feed_address: ContractAddress
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct SortedVaultsAddressChanged {
-    pub sortedVaultsAddress: ContractAddress
+    pub sorted_vaults_address: ContractAddress
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct USDMTokenAddressChanged {
-    pub usdmTokenAddress: ContractAddress
+    pub usdm_token_address: ContractAddress
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct MARTENStakingAddressChanged {
-    pub martenStakingAddress: ContractAddress
+    pub marten_staking_address: ContractAddress
   }
 
   #[derive(starknet::Event, Drop)]
@@ -92,16 +92,16 @@ pub trait IBorrowerOperations {
   }
 
   fn set_addresses(
-    vaultManagerAddress ContractAddress,
-    activePoolAddress ContractAddress,
-    defaultPoolAddress ContractAddress,
-    address _stabilityPoolAddress,
-    address _gasPoolAddress,
-    address _collSurplusPoolAddress,
-    address _priceFeedAddress,
-    address _sortedTrovesAddress,
-    address _lusdTokenAddress,
-    address _lqtyStakingAddress
+    vault_manager_address: ContractAddress,
+    active_pool_address: ContractAddress,
+    default_pool_address: ContractAddress,
+    stability_pool_address: ContractAddress,
+    gas_pool_address: ContractAddress,
+    coll_surplus_pool_address: ContractAddress,
+    price_feed_address: ContractAddress,
+    sorted_vaults_address: ContractAddress,
+    lusd_token_address: ContractAddress,
+    lqty_staking_address: ContractAddress,
   );
 
   fn open_vault(max_fee: uint, usdm_mount: uint, upper_hint: ContractAddress, lower_hint: ContractAddress);

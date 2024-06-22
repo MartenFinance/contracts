@@ -1,22 +1,22 @@
-use starknet::{ContractAddress}
-use marten::interface::IPool::IPool
+use starknet::{ContractAddress};
+use marten::interface::IPool::IPool;
 
 #[starknet::interface]
 #[abi(embed_v0)]
-impl IActivePool of IPool<ContractState>{
+impl IActivePool of IPool<ContractState> {
   #[derive(starknet::Event, Drop)]
   pub struct BorrowerOperationsAddressChanged {
-    pub newBorrowerOperationsAddress: ContractAddress
+    pub new_borrower_operations_address: ContractAddress
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct VaultManagerAddressChanged {
-    pub newVaultManagerAddress: ContractAddress
+    pub new_vault_manager_address: ContractAddress
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct ActivePoolUSDMDebtUpdated {
-    pub USDMDebt: u256
+    pub usdm_debt: u256
   }
 
   #[derive(starknet::Event, Drop)]
@@ -33,5 +33,5 @@ impl IActivePool of IPool<ContractState>{
     ActivePoolETHBalanceUpdated: ActivePoolETHBalanceUpdated,
   }
 
-  fn send_eth(account: ContractAddress, amount: u256) external;
+  fn send_eth(account: ContractAddress, amount: u256);
 }
