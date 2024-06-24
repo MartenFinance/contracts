@@ -19,13 +19,13 @@ pub trait ICollSurplusPool {
 
   #[derive(starknet::Event, Drop)]
   pub struct CollBalanceUpdated {
-    pub account: ContractAddress
+    pub account: ContractAddress,
     pub new_balance: u256
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct EtherSent {
-    pub to: ContractAddress
+    pub to: ContractAddress,
     pub amount: u256
   }
 

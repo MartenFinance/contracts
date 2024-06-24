@@ -54,22 +54,22 @@ pub trait IBorrowerOperations {
 
   #[derive(starknet::Event, Drop)]
   pub struct VaultCreated {
-    pub borrower: ContractAddress
+    pub borrower: ContractAddress,
     pub arrayIndex: u256
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct VaultUpdated {
-    pub borrower: ContractAddress
-    pub debt: u256
-    pub coll: u256
-    pub stake: u256
+    pub borrower: ContractAddress,
+    pub debt: u256,
+    pub coll: u256,
+    pub stake: u256,
     pub operation: u256
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct USDMBorrowingFeePaid {
-    pub borrower: ContractAddress
+    pub borrower: ContractAddress,
     pub USDMFee: u256
   }
 
