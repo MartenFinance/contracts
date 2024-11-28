@@ -1,4 +1,4 @@
-use starknet::{ContractAddress};
+use starknet::ContractAddress;
 use openzeppelin::token::erc20::interface::IERC20;
 
 #[starknet::interface]

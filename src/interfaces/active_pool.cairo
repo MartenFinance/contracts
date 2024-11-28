@@ -1,4 +1,4 @@
-use starknet::{ContractAddress};
+use starknet::ContractAddress;
 use marten::interface::IPool::IPool;
 
 #[starknet::interface]
