@@ -2,9 +2,7 @@ use starknet::ContractAddress;
 use openzeppelin::token::erc20::interface::IERC20;
 
 #[starknet::interface]
-#[abi(embed_v0)]
-#[abi(embed_v0)]
-impl IUSDMToken of IERC20<ContractState> {
+impl IUSDMToken of IERC20<TContractState> {
   #[derive(starknet::Event, Drop)]
   pub struct VaultManagerAddressChanged {
     pub vault_manager_address: ContractAddress
@@ -35,11 +33,11 @@ impl IUSDMToken of IERC20<ContractState> {
     USDMTokenBalanceUpdated: USDMTokenBalanceUpdated,
   }
 
-  fn mint(account: ContractAddress, amount: u256);
+  fn mint(self: @TContractState, account: ContractAddress, amount: u256);
 
-  fn burn(account: ContractAddress, amount: u256);
+  fn burn(self: @TContractState, account: ContractAddress, amount: u256);
 
-  fn send_to_pool(sender: ContractAddress, pool_address: ContractAddress, amount: u256);
+  fn send_to_pool(self: @TContractState, ender: ContractAddress, pool_address: ContractAddress, amount: u256);
 
-  fn return_from_pool(pool_address: ContractAddress, user: ContractAddress, amount: u256);
+  fn return_from_pool(self: @TContractState, pool_address: ContractAddress, user: ContractAddress, amount: u256);
 }

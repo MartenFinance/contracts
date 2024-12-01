@@ -27,5 +27,5 @@ impl IDefaultPool of <ContractState> {
     DefaultPoolETHBalanceUpdated: DefaultPoolETHBalanceUpdated
   }
 
-  fn send_eth_to_active_pool(amount: u256);
+  fn send_eth_to_active_pool(self: @ContractState, amount: u256);
 }
