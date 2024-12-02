@@ -27,6 +27,20 @@ pub mod ActivePool {
   }
 
   // --- Events ---
+  #[event]
+  #[derive(starknet::Event, Drop)]
+  enum Event {
+    #[flat]
+    OwnableEvent: OwnableComponent::Event,
+    BorrowerOperationsAddressChanged: BorrowerOperationsAddressChanged,
+    VaultManagerAddressChanged: VaultManagerAddressChanged,
+    StabilityPoolAddressChanged: StabilityPoolAddressChanged,
+    DefaultPoolAddressChanged: DefaultPoolAddressChanged,
+    ActivePoolUSDMDebtUpdated: ActivePoolUSDMDebtUpdated,
+    ActivePoolETHBalanceUpdated: ActivePoolETHBalanceUpdated,
+    EtherSent: EtherSent,
+  }
+
   #[derive(starknet::Event, Drop)]
   pub struct BorrowerOperationsAddressChanged {
     pub borrower_operations_address: ContractAddress
@@ -61,20 +75,6 @@ pub mod ActivePool {
   pub struct EtherSent {
     pub to: ContractAddress,
     pub amount: u256
-  }
-
-  #[event]
-  #[derive(starknet::Event, Drop)]
-  enum Event {
-    #[flat]
-    OwnableEvent: OwnableComponent::Event,
-    BorrowerOperationsAddressChanged: BorrowerOperationsAddressChanged,
-    VaultManagerAddressChanged: VaultManagerAddressChanged,
-    StabilityPoolAddressChanged: StabilityPoolAddressChanged,
-    DefaultPoolAddressChanged: DefaultPoolAddressChanged,
-    ActivePoolUSDMDebtUpdated: ActivePoolUSDMDebtUpdated,
-    ActivePoolETHBalanceUpdated: ActivePoolETHBalanceUpdated,
-    EtherSent: EtherSent,
   }
 
   // --- Constructor ---
