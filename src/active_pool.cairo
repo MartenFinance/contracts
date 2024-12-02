@@ -1,8 +1,10 @@
 #[starknet::contract]
 pub mod ActivePool {
-  use starknet::{ContractAddress};
+  use starknet::{ContractAddress, get_caller_address};
   use core::num::traits::Zero;
   use openzeppelin::access::ownable::OwnableComponent;
+  use marten::interfaces::active_pool::IActivePool;
+  use marten::interfaces::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
 
   component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
@@ -18,6 +20,7 @@ pub mod ActivePool {
     pub vault_manager_address: ContractAddress,
     pub stability_pool_address: ContractAddress,
     pub default_pool_address: ContractAddress,
+    eth_token: IERC20Dispatcher,
     // deposited ether tracker
     eth: u256,
     usdm_debt: u256
@@ -46,11 +49,17 @@ pub mod ActivePool {
 
   #[derive(starknet::Event, Drop)]
   pub struct ActivePoolUSDMDebtUpdated {
-    pub usdm_debt: u256
+    pub amount: u256
   }
 
   #[derive(starknet::Event, Drop)]
   pub struct ActivePoolETHBalanceUpdated {
+    pub amount: u256
+  }
+
+  #[derive(starknet::Event, Drop)]
+  pub struct EtherSent {
+    pub to: ContractAddress,
     pub amount: u256
   }
 
@@ -65,13 +74,15 @@ pub mod ActivePool {
     DefaultPoolAddressChanged: DefaultPoolAddressChanged,
     ActivePoolUSDMDebtUpdated: ActivePoolUSDMDebtUpdated,
     ActivePoolETHBalanceUpdated: ActivePoolETHBalanceUpdated,
+    EtherSent: EtherSent,
   }
 
   // --- Constructor ---
   #[constructor]
-  fn constructor(ref self: ContractState, owner: ContractAddress) {
+  fn constructor(ref self: ContractState, owner: ContractAddress, eth_address: ContractAddress) {
     assert(Zero::is_non_zero(@owner), 'Owner cannot be zero addres');
     self.ownable.initializer(owner);
+    self.eth_token.write(IERC20Dispatcher { contract_address: eth_address });
   }
 
   // --- Contract setters ---
@@ -83,10 +94,10 @@ pub mod ActivePool {
     default_pool_address: ContractAddress) {
       self.ownable.assert_only_owner();
 
-      assert(Zero::is_non_zero(@borrower_operations_address), 'BORROWER_OPERATIONS_ZERO');
-      assert(Zero::is_non_zero(@vault_manager_address), 'VAULT_MANAGER_ZERO');
-      assert(Zero::is_non_zero(@stability_pool_address), 'STABILITY_POOL_ZERO');
-      assert(Zero::is_non_zero(@default_pool_address), 'DEFAULT_POOL_ZERO');
+      assert(Zero::is_non_zero(@borrower_operations_address), 'AP:BORROWER_OPERATIONS_ZERO');
+      assert(Zero::is_non_zero(@vault_manager_address), 'AP:VAULT_MANAGER_ZERO');
+      assert(Zero::is_non_zero(@stability_pool_address), 'AP:STABILITY_POOL_ZERO');
+      assert(Zero::is_non_zero(@default_pool_address), 'AP:DEFAULT_POOL_ZERO');
 
       self.borrower_operations_address.write(borrower_operations_address);
       self.vault_manager_address.write(vault_manager_address);
@@ -99,5 +110,77 @@ pub mod ActivePool {
       self.emit(DefaultPoolAddressChanged { default_pool_address} );
 
       self.ownable.renounce_ownership();
+  }
+
+  // --- 'require' functions ---
+
+  // Caller is Borrower Operations or Default Pool
+  fn _require_caller_is_BO_or_DP(self: @ContractState) {
+    let caller = get_caller_address();
+    assert(
+      caller == self.borrower_operations_address.read() ||
+      caller == self.default_pool_address.read(),
+    'AP:CALLER_IS_BO_OR_DP');
+  }
+
+  // Caller is Borrower Operations or Vault Manager or Stability Pool
+  fn _require_caller_is_BO_or_VM_or_SP(self: @ContractState) {
+    let caller = get_caller_address();
+    assert(
+      caller == self.borrower_operations_address.read() ||
+      caller == self.vault_manager_address.read() ||
+      caller == self.stability_pool_address.read(),
+    'AP:CALLER_IS_BO_OR_VM_OR_SP');
+  }
+
+  // Caller is Borrower Operations or Vault Manager
+  fn _require_caller_is_BO_or_VM(self: @ContractState) {
+    let caller = get_caller_address();
+    assert(
+      caller == self.borrower_operations_address.read() ||
+      caller == self.vault_manager_address.read(),
+    'AP:CALLER_IS_BO_OR_VM');
+  }
+
+  #[abi(embed_v0)]
+  impl ActivePoolImpl of IActivePool<ContractState> {
+    fn get_eth (self: @ContractState) -> u256 {
+      return self.eth.read();
+    }
+
+    fn get_usdm_debt(self: @ContractState) -> u256 {
+      return self.usdm_debt.read();
+    }
+
+    fn deposit_eth(ref self: ContractState, amount: u256) {
+      _require_caller_is_BO_or_DP(@self);
+      self.eth.write(self.eth.read() + amount);
+
+      self.emit(ActivePoolETHBalanceUpdated { amount: self.eth.read() });
+    }
+
+    fn send_eth(ref self: ContractState, recipient: ContractAddress, amount: u256) {
+      _require_caller_is_BO_or_VM_or_SP(@self);
+      self.eth.write(self.eth.read() - amount);
+
+      self.emit(ActivePoolETHBalanceUpdated { amount: self.eth.read() });
+      self.emit(EtherSent { to: recipient, amount });
+
+      self.eth_token.read().transfer(recipient, amount);
+    }
+
+    fn increase_usdm_debt(ref self: ContractState, amount: u256) {
+      _require_caller_is_BO_or_VM(@self);
+      self.usdm_debt.write(self.usdm_debt.read() + amount);
+
+      self.emit(ActivePoolUSDMDebtUpdated { amount: self.usdm_debt.read() });
+    }
+
+    fn decrease_usdm_debt(ref self: ContractState, amount: u256) {
+      _require_caller_is_BO_or_VM_or_SP(@self);
+      self.usdm_debt.write(self.usdm_debt.read() - amount);
+
+      self.emit(ActivePoolUSDMDebtUpdated { amount: self.usdm_debt.read() });
+    }
   }
 }

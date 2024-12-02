@@ -4,6 +4,7 @@ pub mod interfaces {
   // pub mod coll_surplus_pool;
   // pub mod community_issuance;
   // pub mod default_pool;
+  pub mod erc20;
   // pub mod lockup_contract_factory;
   // pub mod marten_base;
   // pub mod marten_staking;
