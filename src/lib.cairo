@@ -1,7 +1,7 @@
 pub mod interfaces {
   pub mod active_pool;
-  // pub mod borrower_operations;
-  // pub mod coll_surplus_pool;
+  pub mod borrower_operations;
+  pub mod coll_surplus_pool;
   // pub mod community_issuance;
   // pub mod default_pool;
   pub mod erc20;
@@ -13,7 +13,7 @@ pub mod interfaces {
   // pub mod price_feed;
   // pub mod sorted_vault;
   // pub mod stability_pool;
-  // pub mod usdm_token;
+  pub mod usdm_token;
   // pub mod vault_manager;
 }
 

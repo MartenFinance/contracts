@@ -1,8 +1,4 @@
 use starknet::ContractAddress;
-use marten::interfaces::usdm_token::{IUSDMTokenDispatcher};
-use marten::interfaces::marten_token::{IMARTENTokenDispatcher};
-use marten::interfaces::marten_staking::{IMARTENStakingDispatcher};
-use marten::interfaces::price_feed::{IPriceFeedTrait};
 
 #[derive(Drop, Serde, starknet::Store)]
 pub struct DebtAndCollInfo {
@@ -182,12 +178,6 @@ pub trait IVaultManager<TContractState> {
     marten_token_address: ContractAddress,
     marten_staking_address: ContractAddress
   );
-
-  fn price_feed(self: @TContractState) -> IPriceFeedTrait;
-  fn stability_pool(self: @TContractState) -> IStabilityPoolDispatcher;
-  fn usdm_token(self: @TContractState) -> IUSDMTokenDispatcher;
-  fn marten_token(self: @TContractState) -> IMARTENTokenDispatcher;
-  fn marten_staking(self: @TContractState) -> IMARTENStakingDispatcher;
 
   fn get_vault_owners_count(self: @TContractState) -> u256;
 
