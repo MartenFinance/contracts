@@ -85,33 +85,6 @@ pub mod ActivePool {
     self.eth_token.write(IERC20Dispatcher { contract_address: eth_address });
   }
 
-  // --- Contract setters ---
-  fn set_addresses(
-    ref self: ContractState,
-    borrower_operations_address: ContractAddress,
-    vault_manager_address: ContractAddress,
-    stability_pool_address: ContractAddress,
-    default_pool_address: ContractAddress) {
-      self.ownable.assert_only_owner();
-
-      assert(Zero::is_non_zero(@borrower_operations_address), 'AP:BORROWER_OPERATIONS_ZERO');
-      assert(Zero::is_non_zero(@vault_manager_address), 'AP:VAULT_MANAGER_ZERO');
-      assert(Zero::is_non_zero(@stability_pool_address), 'AP:STABILITY_POOL_ZERO');
-      assert(Zero::is_non_zero(@default_pool_address), 'AP:DEFAULT_POOL_ZERO');
-
-      self.borrower_operations_address.write(borrower_operations_address);
-      self.vault_manager_address.write(vault_manager_address);
-      self.stability_pool_address.write(stability_pool_address);
-      self.default_pool_address.write(default_pool_address);
-
-      self.emit(BorrowerOperationsAddressChanged { borrower_operations_address });
-      self.emit(VaultManagerAddressChanged { vault_manager_address });
-      self.emit(StabilityPoolAddressChanged { stability_pool_address });
-      self.emit(DefaultPoolAddressChanged { default_pool_address} );
-
-      self.ownable.renounce_ownership();
-  }
-
   // --- 'require' functions ---
 
   // Caller is Borrower Operations or Default Pool
@@ -144,6 +117,33 @@ pub mod ActivePool {
 
   #[abi(embed_v0)]
   impl ActivePoolImpl of IActivePool<ContractState> {
+    fn set_addresses(
+      ref self: ContractState,
+      borrower_operations_address: ContractAddress,
+      vault_manager_address: ContractAddress,
+      stability_pool_address: ContractAddress,
+      default_pool_address: ContractAddress
+    ) {
+        self.ownable.assert_only_owner();
+
+        assert(Zero::is_non_zero(@borrower_operations_address), 'AP:BORROWER_OPERATIONS_ZERO');
+        assert(Zero::is_non_zero(@vault_manager_address), 'AP:VAULT_MANAGER_ZERO');
+        assert(Zero::is_non_zero(@stability_pool_address), 'AP:STABILITY_POOL_ZERO');
+        assert(Zero::is_non_zero(@default_pool_address), 'AP:DEFAULT_POOL_ZERO');
+
+        self.borrower_operations_address.write(borrower_operations_address);
+        self.vault_manager_address.write(vault_manager_address);
+        self.stability_pool_address.write(stability_pool_address);
+        self.default_pool_address.write(default_pool_address);
+
+        self.emit(BorrowerOperationsAddressChanged { borrower_operations_address });
+        self.emit(VaultManagerAddressChanged { vault_manager_address });
+        self.emit(StabilityPoolAddressChanged { stability_pool_address });
+        self.emit(DefaultPoolAddressChanged { default_pool_address} );
+
+        self.ownable.renounce_ownership();
+    }
+
     fn get_eth (self: @ContractState) -> u256 {
       return self.eth.read();
     }
