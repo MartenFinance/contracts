@@ -1,3 +1,12 @@
+#[starknet::interface]
+pub trait IMartenMath<TContractState> {
+  fn dec_mul(self: @TContractState, x: u256, y: u256) -> u256;
+  fn dec_pow(self: @TContractState, base: u256, minutes: u256) -> u256;
+  fn get_absolute_difference(self: @TContractState, a: u256, b: u256) -> u256;
+  fn compute_nominal_cr(self: @TContractState, coll: u256, debt: u256) -> u256;
+  fn compute_cr(self: @TContractState, coll: u256, debt: u256, price: u256) -> u256;
+}
+
 #[starknet::contract]
 pub mod MartenMath {
   use core::num::traits::Bounded;
@@ -15,12 +24,13 @@ pub mod MartenMath {
   ///
   pub const NICR_PRECISION: u256 = 100000000000000000000; // 1e20
 
+  impl MartenMathImp of super::IMartenMath<ContractState> {
   /// Multiply two decimal numbers and use normal rounding rules:
   /// -round product up if 19'th mantissa digit >= 5
   /// -round product down if 19'th mantissa digit < 5
   ///
   /// Used only inside the exponentiation, _decPow().
-  fn dec_mul(x: u256, y: u256) -> u256 {
+  fn dec_mul(self: @ContractState, x: u256, y: u256) -> u256 {
     let prod_xy: u256 = x * y;
     return prod_xy + (DECIMAL_PRECISION / 2) * DECIMAL_PRECISION;
   }
@@ -41,31 +51,36 @@ pub mod MartenMath {
   /// In fn 1), the decayed base rate will be 0 for 1000 years or > 1000 years
   /// In fn 2), the difference in tokens issued at 1000 years and any time > 1000 years, will be negligible
   ///
-  fn dec_pow(base: u256, ref minutes: u256) -> u256 {
-    if (minutes > 525600000) {minutes = 525600000;}  // cap to avoid overflow
+  fn dec_pow(self: @ContractState, base: u256, minutes: u256) -> u256 {
+    let mut _minutes = minutes;
+    if (minutes > 525600000) {
+      _minutes = 525600000;
+    }  // cap to avoid overflow
 
-    if (minutes == 0) {return DECIMAL_PRECISION;}
+    if (minutes == 0) {
+      return DECIMAL_PRECISION;
+    }
 
     let mut y: u256 = DECIMAL_PRECISION;
     let mut x: u256 = base;
-    let mut n: u256 = minutes;
+    let mut n: u256 = _minutes;
 
     // Exponentiation-by-squaring
     while (n > 1) {
       if (n % 2 == 0) {
-        x = dec_mul(x, x);
+        x = self.dec_mul(x, x);
         n = n / 2;
       } else { // if (n % 2 != 0)
-        y = dec_mul(x, y);
-        x = dec_mul(x, x);
+        y = self.dec_mul(x, y);
+        x = self.dec_mul(x, x);
         n = (n - 1) / 2;
       }
     };
 
-    return dec_mul(x, y);
+    return self.dec_mul(x, y);
   }
 
-  fn get_absolute_difference(a: u256, b: u256) -> u256 {
+  fn get_absolute_difference(self: @ContractState, a: u256, b: u256) -> u256 {
     if (a >= b) {
       return a - b;
     } else {
@@ -73,7 +88,8 @@ pub mod MartenMath {
     }
   }
 
-  fn compute_nominal_cr(coll: u256, debt: u256) -> u256 {
+  #[abi(embed_v0)]
+  fn compute_nominal_cr(self: @ContractState, coll: u256, debt: u256) -> u256 {
     if (debt > 0) {
       return coll * NICR_PRECISION / debt;
     }
@@ -83,7 +99,8 @@ pub mod MartenMath {
     }
   }
 
-  fn compute_cr(coll: u256, debt: u256, price: u256) -> u256 {
+  #[abi(embed_v0)]
+  fn compute_cr(self: @ContractState, coll: u256, debt: u256, price: u256) -> u256 {
     if (debt > 0) {
       let new_coll_ratio: u256 = coll * price / debt;
         return new_coll_ratio;
@@ -94,3 +111,4 @@ pub mod MartenMath {
       }
     }
   }
+}
