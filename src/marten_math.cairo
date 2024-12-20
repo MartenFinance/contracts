@@ -30,7 +30,7 @@ pub mod MartenMath {
     /// -round product up if 19'th mantissa digit >= 5
     /// -round product down if 19'th mantissa digit < 5
     ///
-    /// Used only inside the exponentiation, _decPow().
+    /// Used only inside the exponentiation, dec_pow().
     fn dec_mul(self: @ContractState, x: u256, y: u256) -> u256 {
       let prod_xy: u256 = x * y;
       return prod_xy + (DECIMAL_PRECISION / 2) * DECIMAL_PRECISION;
@@ -40,8 +40,8 @@ pub mod MartenMath {
     /// Uses the efficient "exponentiation by squaring" algorithm. O(log(n)) complexity.
     ///
     /// Called by two fns that represent time in units of minutes:
-    /// 1) TroveManager._calcDecayedBaseRate
-    /// 2) CommunityIssuance._getCumulativeIssuanceFraction
+    /// 1) TroveManager.calc_decayed_base_rate
+    /// 2) CommunityIssuance.get_cumulative_issuance_fraction
     ///
     /// The exponent is capped to avoid reverting due to overflow. The cap 525600000 equals
     /// "minutes in 1000 years": 60 * 24 * 365 * 1000
