@@ -11,7 +11,7 @@ pub mod BorrowerOperations {
   use marten::marten_math::{IMartenMathDispatcher, IMartenMathDispatcherTrait};
   use marten::interfaces::marten_staking::{IMartenStakingDispatcher, IMartenStakingDispatcherTrait};
   use marten::interfaces::price_feed::{IPriceFeedDispatcher, IPriceFeedDispatcherTrait};
-  use marten::interfaces::sorted_vaults::{ISortedVaultsDispatcher};
+  use marten::interfaces::sorted_vaults::{ISortedVaultsDispatcher, ISortedVaultsDispatcherTrait};
   use marten::interfaces::usdm_token::{IUSDMTokenDispatcher, IUSDMTokenDispatcherTrait};
   use marten::interfaces::vault_manager::{IVaultManagerDispatcher, IVaultManagerDispatcherTrait};
 
@@ -302,14 +302,16 @@ pub mod BorrowerOperations {
       // Set the vault struct's properties
       let vault_manager_contract: IVaultManagerDispatcher = IVaultManagerDispatcher { contract_address: self.vault_manager_address.read() };
       let caller = get_caller_address();
+
       vault_manager_contract.set_vault_status(caller, 1);
       vault_manager_contract.increase_vault_coll(caller, eth_amount);
       vault_manager_contract.increase_vault_debt(caller, vars.composite_debt);
-
       vault_manager_contract.update_vault_reward_snapshots(caller);
+
       vars.stake = vault_manager_contract.update_stake_and_total_stakes(caller);
 
-      // sortedTroves.insert(msg.sender, vars.NICR, _upperHint, _lowerHint);
+      let sorted_vaults_contract: ISortedVaultsDispatcher = ISortedVaultsDispatcher { contract_address: self.sorted_vaults_address.read() };
+      sorted_vaults_contract.insert(caller, vars.nicr, upper_hint, lower_hint);
       vars.array_index = vault_manager_contract.add_vault_owner_to_array(caller);
       self.emit(VaultCreated { borrower: caller, array_index: vars.array_index });
 
