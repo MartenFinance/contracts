@@ -85,36 +85,6 @@ pub mod ActivePool {
     self.eth_token.write(IERC20Dispatcher { contract_address: eth_address });
   }
 
-  // --- 'require' functions ---
-
-  // Caller is Borrower Operations or Default Pool
-  fn _require_caller_is_BO_or_DP(self: @ContractState) {
-    let caller = get_caller_address();
-    assert(
-      caller == self.borrower_operations_address.read() ||
-      caller == self.default_pool_address.read(),
-    'AP:CALLER_IS_BO_OR_DP');
-  }
-
-  // Caller is Borrower Operations or Vault Manager or Stability Pool
-  fn _require_caller_is_BO_or_VM_or_SP(self: @ContractState) {
-    let caller = get_caller_address();
-    assert(
-      caller == self.borrower_operations_address.read() ||
-      caller == self.vault_manager_address.read() ||
-      caller == self.stability_pool_address.read(),
-    'AP:CALLER_IS_BO_OR_VM_OR_SP');
-  }
-
-  // Caller is Borrower Operations or Vault Manager
-  fn _require_caller_is_BO_or_VM(self: @ContractState) {
-    let caller = get_caller_address();
-    assert(
-      caller == self.borrower_operations_address.read() ||
-      caller == self.vault_manager_address.read(),
-    'AP:CALLER_IS_BO_OR_VM');
-  }
-
   #[abi(embed_v0)]
   impl ActivePoolImpl of IActivePool<ContractState> {
     fn set_addresses(
@@ -153,14 +123,14 @@ pub mod ActivePool {
     }
 
     fn deposit_eth(ref self: ContractState, amount: u256) {
-      _require_caller_is_BO_or_DP(@self);
+      RequireFunctionsTrait::require_caller_is_BO_or_DP(@self);
       self.eth.write(self.eth.read() + amount);
 
       self.emit(ActivePoolETHBalanceUpdated { amount: self.eth.read() });
     }
 
     fn send_eth(ref self: ContractState, recipient: ContractAddress, amount: u256) {
-      _require_caller_is_BO_or_VM_or_SP(@self);
+      RequireFunctionsTrait::require_caller_is_BO_or_VM_or_SP(@self);
       self.eth.write(self.eth.read() - amount);
 
       self.emit(ActivePoolETHBalanceUpdated { amount: self.eth.read() });
@@ -170,17 +140,49 @@ pub mod ActivePool {
     }
 
     fn increase_usdm_debt(ref self: ContractState, amount: u256) {
-      _require_caller_is_BO_or_VM(@self);
+      RequireFunctionsTrait::require_caller_is_BO_or_VM(@self);
       self.usdm_debt.write(self.usdm_debt.read() + amount);
 
       self.emit(ActivePoolUSDMDebtUpdated { amount: self.usdm_debt.read() });
     }
 
     fn decrease_usdm_debt(ref self: ContractState, amount: u256) {
-      _require_caller_is_BO_or_VM_or_SP(@self);
+      RequireFunctionsTrait::require_caller_is_BO_or_VM_or_SP(@self);
       self.usdm_debt.write(self.usdm_debt.read() - amount);
 
       self.emit(ActivePoolUSDMDebtUpdated { amount: self.usdm_debt.read() });
+    }
+  }
+
+  // --- 'require' functions ---
+  #[generate_trait]
+  pub impl RequireFunctions of RequireFunctionsTrait {
+    // Caller is Borrower Operations or Default Pool
+    fn require_caller_is_BO_or_DP(self: @ContractState) {
+      let caller = get_caller_address();
+      assert(
+        caller == self.borrower_operations_address.read() ||
+        caller == self.default_pool_address.read(),
+      'AP:CALLER_IS_BO_OR_DP');
+    }
+
+    // Caller is Borrower Operations or Vault Manager or Stability Pool
+    fn require_caller_is_BO_or_VM_or_SP(self: @ContractState) {
+      let caller = get_caller_address();
+      assert(
+        caller == self.borrower_operations_address.read() ||
+        caller == self.vault_manager_address.read() ||
+        caller == self.stability_pool_address.read(),
+      'AP:CALLER_IS_BO_OR_VM_OR_SP');
+    }
+
+    // Caller is Borrower Operations or Vault Manager
+    fn require_caller_is_BO_or_VM(self: @ContractState) {
+      let caller = get_caller_address();
+      assert(
+        caller == self.borrower_operations_address.read() ||
+        caller == self.vault_manager_address.read(),
+      'AP:CALLER_IS_BO_OR_VM');
     }
   }
 }

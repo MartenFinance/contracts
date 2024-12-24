@@ -6,7 +6,6 @@ pub trait IMartenMath<TContractState> {
   fn compute_nominal_cr(self: @TContractState, coll: u256, debt: u256) -> u256;
   fn compute_cr(self: @TContractState, coll: u256, debt: u256, price: u256) -> u256;
 }
-
 #[starknet::contract]
 pub mod MartenMath {
   use core::num::traits::Bounded;

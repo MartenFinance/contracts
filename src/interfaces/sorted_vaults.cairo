@@ -2,13 +2,13 @@ use starknet::ContractAddress;
 
 #[starknet::interface]
 pub trait ISortedVaults<TContractState> {
-  fn set_params(ref self TContractState, size: u256, trove_manager_address: ContractAddress, borrower_operations_address: ContractAddress);
+  fn set_params(ref self: TContractState, size: u256, trove_manager_address: ContractAddress, borrower_operations_address: ContractAddress);
 
-  fn insert(ref self TContractState, id: ContractAddress, icr: u256, prev_id: ContractAddress, next_id: ContractAddress);
+  fn insert(ref self: TContractState, id: ContractAddress, icr: u256, prev_id: ContractAddress, next_id: ContractAddress);
 
-  fn remove(ref self TContractState, id: ContractAddress);
+  fn remove(ref self: TContractState, id: ContractAddress);
 
-  fn re_insert(ref self TContractState, id: ContractAddress, new_icr: ContractAddress, prev_id: ContractAddress, next_id: ContractAddress);
+  fn re_insert(ref self: TContractState, id: ContractAddress, new_icr: ContractAddress, prev_id: ContractAddress, next_id: ContractAddress);
 
   fn contains(self: @TContractState, id: ContractAddress) -> bool;
 
@@ -30,7 +30,7 @@ pub trait ISortedVaults<TContractState> {
 
   fn valid_insert_position(self: @TContractState, icr: u256, prev_id: ContractAddress, next_id: ContractAddress) -> bool;
 
-  fn find_insert_position(self: @TContractState, icr: u256, prev_id: ContractAddress, next_id: ContractAddress) -> (next_id: ContractAddress, prev_id: ContractAddress);
+  fn find_insert_position(self: @TContractState, icr: u256, prev_id: ContractAddress, next_id: ContractAddress) -> (ContractAddress, ContractAddress);
 
   // #[derive(starknet::Event, Drop)]
   // pub struct SortedVaultsAddressChanged {

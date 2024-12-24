@@ -9,14 +9,14 @@ pub trait IMartenStaking<TContractState> {
     vault_manager_address: ContractAddress,
     borrower_pperations_address: ContractAddress,
     active_pool_address: ContractAddress
-  )
+  );
 
   fn stake(ref self: TContractState, amount: u256);
   fn unstake(ref self: TContractState, amount: u256);
-  fn increaseF_ETH(ref self: TContractState, eth_fee: u256);
-  fn increaseF_USDM(ref self: TContractState, marten_fee: u256);
-  fn getPendingETHGain(self: @TContractState, user: ContractAddress) -> u256;
-  fn getPendingUSDMGain(self: @TContractState, user: ContractAddress) -> u256;
+  fn increase_f_eth(ref self: TContractState, eth_fee: u256);
+  fn increase_f_usdm(ref self: TContractState, marten_fee: u256);
+  fn get_pending_eth_gain(self: @TContractState, user: ContractAddress) -> u256;
+  fn get_pending_usdm_gain(self: @TContractState, user: ContractAddress) -> u256;
 
   // #[derive(starknet::Event, Drop)]
   // pub struct MARTENTokenAddressSet {

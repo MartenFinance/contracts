@@ -1,5 +1,5 @@
 #[starknet::interface]
-pub trait IPriceFeed {
+pub trait IPriceFeed<TContractState> {
   // #[derive(starknet::Event, Drop)]
   // pub struct LastGoodPriceUpdated {
   //   pub last_good_price: u256
@@ -10,5 +10,5 @@ pub trait IPriceFeed {
   // enum Event {
   //   LastGoodPriceUpdated: LastGoodPriceUpdated,
   // }
-  fn fetch_price() -> u256;
+  fn fetch_price(self: @TContractState) -> u256;
 }
