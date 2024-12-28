@@ -7,7 +7,8 @@ pub trait IActivePool<TContractState> {
     borrower_operations_address: ContractAddress,
     vault_manager_address: ContractAddress,
     stability_pool_address: ContractAddress,
-    default_pool_address: ContractAddress
+    default_pool_address: ContractAddress,
+    eth_token_address: ContractAddress,
   );
   fn get_eth(self: @TContractState) -> u256;
   fn get_usdm_debt(self: @TContractState) -> u256;

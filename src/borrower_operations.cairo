@@ -25,19 +25,19 @@ pub mod BorrowerOperations {
   struct Storage {
     #[substorage(v0)]
     ownable: OwnableComponent::Storage,
-    active_pool_address: ContractAddress,
-    coll_surplus_pool_address: ContractAddress,
-    default_pool_address: ContractAddress,
-    eth_token_address: ContractAddress,
-    gas_pool_address: ContractAddress,
-    marten_base_address: ContractAddress,
-    marten_math_address: ContractAddress,
-    marten_staking_address: ContractAddress,
-    price_feed_address: ContractAddress,
-    sorted_vaults_address: ContractAddress,
-    stability_pool_address: ContractAddress,
-    usdm_token_address: ContractAddress,
-    vault_manager_address: ContractAddress
+    pub active_pool_address: ContractAddress,
+    pub coll_surplus_pool_address: ContractAddress,
+    pub default_pool_address: ContractAddress,
+    pub eth_token_address: ContractAddress,
+    pub gas_pool_address: ContractAddress,
+    pub marten_base_address: ContractAddress,
+    pub marten_math_address: ContractAddress,
+    pub marten_staking_address: ContractAddress,
+    pub price_feed_address: ContractAddress,
+    pub sorted_vaults_address: ContractAddress,
+    pub stability_pool_address: ContractAddress,
+    pub usdm_token_address: ContractAddress,
+    pub vault_manager_address: ContractAddress
   }
 
   #[derive(Copy, Drop, Serde, Hash, starknet::Store)]

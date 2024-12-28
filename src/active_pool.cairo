@@ -20,7 +20,7 @@ pub mod ActivePool {
     pub vault_manager_address: ContractAddress,
     pub stability_pool_address: ContractAddress,
     pub default_pool_address: ContractAddress,
-    eth_token: IERC20Dispatcher,
+    pub eth_token_address: ContractAddress,
     // deposited ether tracker
     eth: u256,
     usdm_debt: u256
@@ -79,10 +79,9 @@ pub mod ActivePool {
 
   // --- Constructor ---
   #[constructor]
-  fn constructor(ref self: ContractState, owner: ContractAddress, eth_address: ContractAddress) {
+  fn constructor(ref self: ContractState, owner: ContractAddress) {
     assert(Zero::is_non_zero(@owner), 'Owner cannot be zero addres');
     self.ownable.initializer(owner);
-    self.eth_token.write(IERC20Dispatcher { contract_address: eth_address });
   }
 
   #[abi(embed_v0)]
@@ -92,7 +91,8 @@ pub mod ActivePool {
       borrower_operations_address: ContractAddress,
       vault_manager_address: ContractAddress,
       stability_pool_address: ContractAddress,
-      default_pool_address: ContractAddress
+      default_pool_address: ContractAddress,
+      eth_token_address: ContractAddress
     ) {
         self.ownable.assert_only_owner();
 
@@ -100,11 +100,13 @@ pub mod ActivePool {
         assert(Zero::is_non_zero(@vault_manager_address), 'AP:VAULT_MANAGER_ZERO');
         assert(Zero::is_non_zero(@stability_pool_address), 'AP:STABILITY_POOL_ZERO');
         assert(Zero::is_non_zero(@default_pool_address), 'AP:DEFAULT_POOL_ZERO');
+        assert(Zero::is_non_zero(@eth_token_address), 'AP:DEFAULT_POOL_ZERO');
 
         self.borrower_operations_address.write(borrower_operations_address);
         self.vault_manager_address.write(vault_manager_address);
         self.stability_pool_address.write(stability_pool_address);
         self.default_pool_address.write(default_pool_address);
+        self.eth_token_address.write(eth_token_address);
 
         self.emit(BorrowerOperationsAddressChanged { borrower_operations_address });
         self.emit(VaultManagerAddressChanged { vault_manager_address });
@@ -136,7 +138,8 @@ pub mod ActivePool {
       self.emit(ActivePoolETHBalanceUpdated { amount: self.eth.read() });
       self.emit(EtherSent { to: recipient, amount });
 
-      self.eth_token.read().transfer(recipient, amount);
+      let eth_token: IERC20Dispatcher = IERC20Dispatcher { contract_address: self.eth_token_address.read() };
+      eth_token.transfer(recipient, amount);
     }
 
     fn increase_usdm_debt(ref self: ContractState, amount: u256) {
