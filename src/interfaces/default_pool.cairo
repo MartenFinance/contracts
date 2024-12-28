@@ -1,29 +1,22 @@
+use starknet::ContractAddress;
+
 #[starknet::interface]
 pub trait IDefaultPool<TContractState> {
-  // #[derive(starknet::Event, Drop)]
-  // pub struct VaultManagerAddressChanged {
-  //   pub new_vault_manager_address: ContractAddress
-  // }
+  fn set_addresses(
+    ref self: TContractState,
+    vault_manager_address: ContractAddress,
+    active_pool_address: ContractAddress,
+  );
 
-  // #[derive(starknet::Event, Drop)]
-  // pub struct DefaultPoolUSDMDebtUpdated {
-  //   pub usdm_debt: u256
-  // }
-
-  // #[derive(starknet::Event, Drop)]
-  // pub struct DefaultPoolETHBalanceUpdated {
-  //   pub amount: u256
-  // }
-
-  // #[event]
-  // #[derive(starknet::Event, Drop)]
-  // enum Event {
-  //   VaultManagerAddressChanged: VaultManagerAddressChanged,
-  //   DefaultPoolUSDMDebtUpdated: DefaultPoolUSDMDebtUpdated,
-  //   DefaultPoolETHBalanceUpdated: DefaultPoolETHBalanceUpdated
-  // }
+  fn deposit_eth(ref self: TContractState, amount: u256);
 
   fn get_eth(self: @TContractState) -> u256;
+
   fn get_usdm_debt(self: @TContractState) -> u256;
-  fn send_eth_to_active_pool(self: @TContractState, amount: u256);
+
+  fn send_eth_to_active_pool(ref self: TContractState, amount: u256);
+
+  fn increase_usdm_debt(ref self: TContractState, amount: u256);
+
+  fn decrease_usdm_debt(self: @TContractState, amount: u256);
 }

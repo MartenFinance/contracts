@@ -272,17 +272,17 @@ pub mod BorrowerOperations {
       vars.price = price_feed_contract.fetch_price();
       let is_recovery_mode: bool = marten_base_contract.check_recovery_mode(vars.price);
 
-      InternalFunctionsTrait::require_valid_max_fee_percentage(@self, max_fee_percentage, is_recovery_mode);
-      InternalFunctionsTrait::require_vault_is_not_active(@self, caller);
+      self.require_valid_max_fee_percentage(max_fee_percentage, is_recovery_mode);
+      self.require_vault_is_not_active(caller);
 
       vars.net_debt = usdm_amount;
 
       if(!is_recovery_mode) {
-        vars.usdm_fee = InternalFunctionsTrait::trigger_borrowing_fee(@self, usdm_amount, max_fee_percentage);
+        vars.usdm_fee = self.trigger_borrowing_fee(usdm_amount, max_fee_percentage);
         vars.net_debt = vars.net_debt + vars.usdm_fee;
       }
 
-      InternalFunctionsTrait::require_at_least_min_net_debt(@self, vars.net_debt);
+      self.require_at_least_min_net_debt(vars.net_debt);
 
        // ICR is based on the composite debt, i.e. the requested USDM amount + USDM borrowing fee + USDM gas comp.
       vars.composite_debt = marten_base_contract.get_composite_debt(vars.net_debt);
@@ -293,11 +293,11 @@ pub mod BorrowerOperations {
       vars.nicr = marten_math_contract.compute_nominal_cr(eth_amount, vars.composite_debt);
 
       if(is_recovery_mode) {
-        InternalFunctionsTrait::require_icr_is_above_ccr(@self, vars.icr);
+        self.require_icr_is_above_ccr(vars.icr);
       } else {
-        InternalFunctionsTrait::require_icr_is_above_mcr(@self, vars.icr);
-        let new_tcr = InternalFunctionsTrait::get_new_tcr_from_vault_change(@self, eth_amount, true, vars.composite_debt, true, vars.price);
-        InternalFunctionsTrait::require_icr_is_above_ccr(@self, new_tcr);
+        self.require_icr_is_above_mcr(vars.icr);
+        let new_tcr = self.get_new_tcr_from_vault_change(eth_amount, true, vars.composite_debt, true, vars.price);
+        self.require_icr_is_above_ccr(new_tcr);
       }
 
       // Set the vault struct's properties

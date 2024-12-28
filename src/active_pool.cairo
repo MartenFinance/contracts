@@ -116,6 +116,12 @@ pub mod ActivePool {
         self.ownable.renounce_ownership();
     }
 
+    fn deposit_eth(ref self: ContractState, amount: u256) {
+      self.require_caller_is_BO_or_DP();
+      self.eth.write(self.eth.read() + amount);
+      self.emit(ActivePoolETHBalanceUpdated { amount: self.eth.read() });
+    }
+
     fn get_eth (self: @ContractState) -> u256 {
       return self.eth.read();
     }
@@ -124,33 +130,27 @@ pub mod ActivePool {
       return self.usdm_debt.read();
     }
 
-    fn deposit_eth(ref self: ContractState, amount: u256) {
-      RequireFunctionsTrait::require_caller_is_BO_or_DP(@self);
-      self.eth.write(self.eth.read() + amount);
-
-      self.emit(ActivePoolETHBalanceUpdated { amount: self.eth.read() });
-    }
-
     fn send_eth(ref self: ContractState, recipient: ContractAddress, amount: u256) {
-      RequireFunctionsTrait::require_caller_is_BO_or_VM_or_SP(@self);
+      self.require_caller_is_BO_or_VM_or_SP();
       self.eth.write(self.eth.read() - amount);
 
       self.emit(ActivePoolETHBalanceUpdated { amount: self.eth.read() });
       self.emit(EtherSent { to: recipient, amount });
 
       let eth_token: IERC20Dispatcher = IERC20Dispatcher { contract_address: self.eth_token_address.read() };
-      eth_token.transfer(recipient, amount);
+      let success = eth_token.transfer(recipient, amount);
+      assert(success, 'AP:SEND_ETH_FAILED');
     }
 
     fn increase_usdm_debt(ref self: ContractState, amount: u256) {
-      RequireFunctionsTrait::require_caller_is_BO_or_VM(@self);
+      self.require_caller_is_BO_or_VM();
       self.usdm_debt.write(self.usdm_debt.read() + amount);
 
       self.emit(ActivePoolUSDMDebtUpdated { amount: self.usdm_debt.read() });
     }
 
     fn decrease_usdm_debt(ref self: ContractState, amount: u256) {
-      RequireFunctionsTrait::require_caller_is_BO_or_VM_or_SP(@self);
+      self.require_caller_is_BO_or_VM_or_SP();
       self.usdm_debt.write(self.usdm_debt.read() - amount);
 
       self.emit(ActivePoolUSDMDebtUpdated { amount: self.usdm_debt.read() });

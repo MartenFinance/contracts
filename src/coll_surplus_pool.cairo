@@ -102,6 +102,11 @@ pub mod CollSurPlusPool {
       self.ownable.renounce_ownership();
     }
 
+    fn deposit_eth(ref self: ContractState, amount: u256) {
+      self.require_caller_is_active_pool();
+      self.eth.write(self.eth.read() + amount);
+    }
+
     fn get_eth(self: @ContractState) -> u256 {
       return self.eth.read();
     }
@@ -132,7 +137,8 @@ pub mod CollSurPlusPool {
       self.emit(EtherSent { to: account, amount: claimable_coll });
 
       let eth_token: IERC20Dispatcher = IERC20Dispatcher { contract_address: self.eth_token_address.read() };
-      eth_token.transfer(account, claimable_coll);
+      let success = eth_token.transfer(account, claimable_coll);
+      assert(success, 'CSO:SEND_ETH_FAILED');
     }
   }
 

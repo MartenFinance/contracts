@@ -10,6 +10,8 @@ pub trait ICollSurplusPool<TContractState> {
     eth_token_address: ContractAddress
   );
 
+  fn deposit_eth(ref self: TContractState, amount: u256);
+
   fn get_eth(self: @TContractState) -> u256;
 
   fn get_collateral(self: @TContractState, account: ContractAddress) -> u256;
