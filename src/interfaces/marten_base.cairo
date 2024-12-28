@@ -12,7 +12,7 @@ pub trait IMartenBase<TContractState> {
   fn get_composite_debt(self: @TContractState, debt: u256) -> u256;
   fn get_net_debt(self: @TContractState, debt: u256) -> u256;
   fn get_coll_gas_compensation(self: @TContractState, entire_coll: u256) -> u256;
-  fn get_entire_system_col(self: @TContractState) -> u256;
+  fn get_entire_system_coll(self: @TContractState) -> u256;
   fn get_entire_system_debt(self: @TContractState) -> u256;
   fn get_tcr(self: @TContractState, price: u256) -> u256;
   fn check_recovery_mode(self: @TContractState, price: u256) -> bool;

@@ -21,19 +21,19 @@ pub trait IBorrowerOperations<TContractState> {
 
   fn open_vault(ref self: TContractState, max_fee_percentage: u256, eth_amount: u256, usdm_amount: u256, upper_hint: ContractAddress, lower_hint: ContractAddress);
 
-  fn add_coll(ref self: TContractState, upper_hint: ContractAddress, lower_hint: ContractAddress);
+  fn add_coll(ref self: TContractState, eth_amount: u256, upper_hint: ContractAddress, lower_hint: ContractAddress);
 
-  fn move_eth_gain_to_vault(ref self: TContractState, user: ContractAddress, upper_hint: ContractAddress, lower_hint: ContractAddress);
+  fn move_eth_gain_to_vault(ref self: TContractState, user: ContractAddress, eth_amount: u256, upper_hint: ContractAddress, lower_hint: ContractAddress);
 
-  fn withdraw_coll(ref self: TContractState, amount: u256, upper_hint: ContractAddress, lower_hint: ContractAddress);
+  fn withdraw_coll(ref self: TContractState, coll_withdrawal: u256, upper_hint: ContractAddress, lower_hint: ContractAddress);
 
-  fn withdraw_usdm(ref self: TContractState, maxFee: u256, amount: u256, upper_hint: ContractAddress, lower_hint: ContractAddress);
+  fn withdraw_usdm(ref self: TContractState, max_fee_percentage: u256, amount: u256, upper_hint: ContractAddress, lower_hint: ContractAddress);
 
   fn repay_usdm(ref self: TContractState, amount: u256, upper_hint: ContractAddress, lower_hint: ContractAddress);
 
   fn close_vault(ref self: TContractState);
 
-  fn adjust_vault(ref self: TContractState, max_fee: u256, coll_withdrawal: u256, debt_change: u256, is_debt_increase: bool, upper_hint: ContractAddress, lower_hint: ContractAddress);
+  fn adjust_vault(ref self: TContractState, max_fee: u256, coll_withdrawal: u256, eth_amount: u256, debt_change: u256, is_debt_increase: bool, upper_hint: ContractAddress, lower_hint: ContractAddress);
 
   fn claim_collateral(ref self: TContractState);
 }

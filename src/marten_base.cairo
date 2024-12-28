@@ -80,7 +80,7 @@ pub mod MartenBase {
       return entire_coll / PERCENT_DIVISOR;
     }
 
-    fn get_entire_system_col(self: @ContractState) -> u256 {
+    fn get_entire_system_coll(self: @ContractState) -> u256 {
       let active_pool_contract: IActivePoolDispatcher = IActivePoolDispatcher { contract_address: self.active_pool_address.read() };
       let default_pool_contract: IDefaultPoolDispatcher = IDefaultPoolDispatcher { contract_address: self.default_pool_address.read() };
 
@@ -101,7 +101,7 @@ pub mod MartenBase {
     fn get_tcr(self: @ContractState, price: u256) -> u256 {
       let marten_math_contract: IMartenMathDispatcher = IMartenMathDispatcher { contract_address: self.marten_math_address.read() };
 
-      let entire_system_coll: u256 = self.get_entire_system_col();
+      let entire_system_coll: u256 = self.get_entire_system_coll();
       let entire_system_debt: u256 = self.get_entire_system_debt();
 
       return marten_math_contract.compute_cr(entire_system_coll, entire_system_debt, price);
