@@ -100,7 +100,7 @@ pub mod ActivePool {
         assert(Zero::is_non_zero(@vault_manager_address), 'AP:VAULT_MANAGER_ZERO');
         assert(Zero::is_non_zero(@stability_pool_address), 'AP:STABILITY_POOL_ZERO');
         assert(Zero::is_non_zero(@default_pool_address), 'AP:DEFAULT_POOL_ZERO');
-        assert(Zero::is_non_zero(@eth_token_address), 'AP:DEFAULT_POOL_ZERO');
+        assert(Zero::is_non_zero(@eth_token_address), 'AP:ETH_ADDRESS_ZERO');
 
         self.borrower_operations_address.write(borrower_operations_address);
         self.vault_manager_address.write(vault_manager_address);
