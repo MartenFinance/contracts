@@ -1,8 +1,12 @@
 #[starknet::contract]
 pub mod HintHelpers {
-  use starknet::{ContractAddress, get_caller_address};
+  use starknet::{ContractAddress};
   use core::keccak::keccak_u256s_be_inputs;
+  use core::num::traits::Zero;
+  use core::num::traits::Bounded;
+  use core::cmp::min;
   use openzeppelin::access::ownable::OwnableComponent;
+  use marten::interfaces::hint_helpers::IHintHelpers;
   use marten::interfaces::marten_base::{IMartenBaseDispatcher, IMartenBaseDispatcherTrait};
   use marten::marten_math::{IMartenMathDispatcher, IMartenMathDispatcherTrait};
   use marten::interfaces::sorted_vaults::{ISortedVaultsDispatcher, ISortedVaultsDispatcherTrait};
@@ -11,10 +15,15 @@ pub mod HintHelpers {
   component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
   #[abi(embed_v0)]
+  impl OwnableMixinImpl = OwnableComponent::OwnableMixinImpl<ContractState>;
+  impl InternalImpl = OwnableComponent::InternalImpl<ContractState>;
+
+  #[storage]
   struct Storage {
     #[substorage(v0)]
     ownable: OwnableComponent::Storage,
     pub marten_base_address: ContractAddress,
+    pub marten_math_address: ContractAddress,
     pub sorted_vaults_address: ContractAddress,
     pub vault_manager_address: ContractAddress,
   }
@@ -65,12 +74,15 @@ pub mod HintHelpers {
     ) {
       self.ownable.assert_only_owner();
 
-      assert(Zero::is_non_zero(@marten_base_address), 'HH:MARTEN_BASE_ZERO');
+      assert(Zero::is_non_zero(@marten_base_address), 'HH:MARTEN_MATH _ZERO');
+      assert(Zero::is_non_zero(@marten_math_address), 'HH:MARTEN_BASE_ZERO');
       assert(Zero::is_non_zero(@sorted_vaults_address), 'HH:SORTED_VAULTS_ZERO');
       assert(Zero::is_non_zero(@vault_manager_address), 'HH:VAULT_MANAGER_ZERO');
 
-      self.storage.sorted_vaults_address.write(sorted_vaults_address);
-      self.storage.vault_manager_address.write(vault_manager_address);
+      self.marten_base_address.write(marten_base_address);
+      self.marten_math_address.write(marten_math_address);
+      self.sorted_vaults_address.write(sorted_vaults_address);
+      self.vault_manager_address.write(vault_manager_address);
 
       self.ownable.renounce_ownership();
     }
@@ -91,32 +103,34 @@ pub mod HintHelpers {
     /// The number of Vaults to consider for redemption can be capped by passing a non-zero value as `max_iterations`, while passing zero
     /// will leave it uncapped.
     ///
-    fn get_redemption_hints(self: @ContractAddress, usdm_amount: u256, price: u256, max_iterations: u256) -> (ContractAddress, u256, u256) {
-      let marten_base_contract: IMartenBaseDispatcher = IMartenBaseDispatcher { contract: self.marten_base_address.read() };
-      let marten_math_contract: IMartenMathDispatcher = IMartenMathDispatcher { contract: self.marten_math_address.read() };
-      let sorted_vault_contract: ISortedVaultsDispatcher = ISortedVaultsDispatcher { contract: self.sorted_vaults_address.read() };
-      let vault_manager_contract: IVaultManagerDispatcher = IVaultManagerDispatcher { contract: self.vault_manager_address.read() };
+    fn get_redemption_hints(self: @ContractState, usdm_amount: u256, price: u256, max_iterations: u256) -> (ContractAddress, u256, u256) {
+      let marten_base_contract: IMartenBaseDispatcher = IMartenBaseDispatcher { contract_address: self.marten_base_address.read() };
+      let marten_math_contract: IMartenMathDispatcher = IMartenMathDispatcher { contract_address: self.marten_math_address.read() };
+      let sorted_vault_contract: ISortedVaultsDispatcher = ISortedVaultsDispatcher { contract_address: self.sorted_vaults_address.read() };
+      let vault_manager_contract: IVaultManagerDispatcher = IVaultManagerDispatcher { contract_address: self.vault_manager_address.read() };
 
       let mut current_vault_user: ContractAddress = sorted_vault_contract.get_last();
       let mut remaining_usdm: u256 = usdm_amount;
-      let partial_redemption_hint_icr: u256 = 0;
+      let mut partial_redemption_hint_icr: u256 = 0;
 
-      while (Zero::is_none_zero(@current_vault_user) && vault_manager_contract.get_current_icr(current_vault_user, price) < MCR) {
+      while (Zero::is_non_zero(@current_vault_user) && vault_manager_contract.get_current_icr(current_vault_user, price) < MCR) {
         current_vault_user = sorted_vault_contract.get_prev(current_vault_user);
-      }
+      };
 
       let first_redemption_hint = current_vault_user;
+      let mut _max_iterations = max_iterations;
 
-      if (max_iterations == 0) {
-        max_iterations = -1;
+      if (_max_iterations == 0) {
+        _max_iterations = Bounded::<u256>::MAX;
       }
 
-      while (Zero::is_none_zero(@current_vault_user) && remaining_usdm > 0 && max_iterations-- > 0) {
+      _max_iterations -= 1;
+      while (Zero::is_non_zero(@current_vault_user) && remaining_usdm > 0 && _max_iterations > 0) {
         let net_usdm_debt = marten_base_contract.get_net_debt(vault_manager_contract.get_vault_debt(current_vault_user)) + vault_manager_contract.get_pending_usdm_debt_reward(current_vault_user);
 
         if (net_usdm_debt > remaining_usdm) {
           if (net_usdm_debt > MIN_NET_DEBT) {
-            let max_redeemable_usdm = marten_math_contract.min(remaining_usdm, net_usdm_debt - MIN_NET_DEBT);
+            let max_redeemable_usdm = min(remaining_usdm, net_usdm_debt - MIN_NET_DEBT);
 
             let eth = vault_manager_contract.get_vault_coll(current_vault_user) + vault_manager_contract.get_pending_eth_reward(current_vault_user);
             let new_coll = eth - (max_redeemable_usdm * DECIMAL_PRECISION / price);
@@ -133,7 +147,7 @@ pub mod HintHelpers {
         }
 
         current_vault_user = sorted_vault_contract.get_prev(current_vault_user);
-      }
+      };
 
       let truncated_usdm_amount = usdm_amount - remaining_usdm;
 
@@ -150,27 +164,28 @@ pub mod HintHelpers {
     /// Submitting num_trials = k * sqrt(length), with k = 15 makes it very, very likely that the ouput address will
     /// be <= sqrt(length) positions away from the correct insert position.
     ///
-    fn get_approx_hint(self: @ContractAddress, cr: u256, num_trials: u256, input_random_seed: u256) -> (ContractAddress, u256, u256) {
-      let vault_manager_contract: IVaultManagerDispatcher = IVaultManagerDispatcher { contract: self.vault_manager_address.read() };
-      let marten_math_contract: IMartenMathDispatcher = IMartenMathDispatcher { contract: self.marten_math_address.read() };
+    fn get_approx_hint(self: @ContractState, cr: u256, num_trials: u256, input_random_seed: u256) -> (ContractAddress, u256, u256) {
+      let sorted_vaults_contract: ISortedVaultsDispatcher = ISortedVaultsDispatcher { contract_address: self.sorted_vaults_address.read() };
+      let vault_manager_contract: IVaultManagerDispatcher = IVaultManagerDispatcher { contract_address: self.vault_manager_address.read() };
+      let marten_math_contract: IMartenMathDispatcher = IMartenMathDispatcher { contract_address: self.marten_math_address.read() };
 
       let array_length = vault_manager_contract.get_vault_owners_count();
 
       if (array_length == 0) {
-        return (Zero, 0, input_random_seed);
+        return (Zero::<ContractAddress>::zero(), 0, input_random_seed);
       }
 
-      let mut hint_address: ContractAddress = vault_manager_contract.get_last();
+      let mut hint_address: ContractAddress = sorted_vaults_contract.get_last();
       let mut diff: u256 = marten_math_contract.get_absolute_difference(cr, vault_manager_contract.get_nominal_icr(hint_address));
       let mut latest_random_seed: u256 = input_random_seed;
 
       let mut i: u256 = 1;
 
       while (i < num_trials) {
-        latest_random_seed = keccak_u256s_be_inputs(latest_random_seed);
+        latest_random_seed = keccak_u256s_be_inputs([latest_random_seed].span());
 
         let array_index: u256 = latest_random_seed % array_length;
-        let current_address: ContractAddress = vault_manager_contract.get_trove_from_trove_owners_array(array_index);
+        let current_address: ContractAddress = vault_manager_contract.get_vault_from_vault_owners_array(array_index);
         let current_nicr: u256 = vault_manager_contract.get_nominal_icr(current_address);
 
         // check if abs(current - CR) > abs(closest - CR), and update closest if current is closer
@@ -180,17 +195,19 @@ pub mod HintHelpers {
           diff = current_diff;
           hint_address = current_address;
         }
-        i++;
-      }
+        i += 1;
+      };
+
+      return (hint_address, diff, latest_random_seed);
     }
 
-    fn compute_nominal_cr(self: @ContractAddress, coll: u256, debt: u256) {
-      let marten_math_contract: IMartenMathDispatcher = IMartenMathDispatcher { contract: self.marten_math_address.read() };
+    fn compute_nominal_cr(self: @ContractState, coll: u256, debt: u256) -> u256 {
+      let marten_math_contract: IMartenMathDispatcher = IMartenMathDispatcher { contract_address: self.marten_math_address.read() };
       return marten_math_contract.compute_nominal_cr(coll, debt);
     }
 
-    fn compute_cr(self: @ContractAddress, coll: u256, debt: u256, price: u256) {
-      let marten_math_contract: IMartenMathDispatcher = IMartenMathDispatcher { contract: self.marten_math_address.read() };
+    fn compute_cr(self: @ContractState, coll: u256, debt: u256, price: u256) -> u256 {
+      let marten_math_contract: IMartenMathDispatcher = IMartenMathDispatcher { contract_address: self.marten_math_address.read() };
       return marten_math_contract.compute_cr(coll, debt, price);
     }
   }

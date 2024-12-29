@@ -6,6 +6,7 @@ pub trait IDefaultPool<TContractState> {
     ref self: TContractState,
     vault_manager_address: ContractAddress,
     active_pool_address: ContractAddress,
+    eth_token_address: ContractAddress
   );
 
   fn deposit_eth(ref self: TContractState, amount: u256);
@@ -18,5 +19,5 @@ pub trait IDefaultPool<TContractState> {
 
   fn increase_usdm_debt(ref self: TContractState, amount: u256);
 
-  fn decrease_usdm_debt(self: @TContractState, amount: u256);
+  fn decrease_usdm_debt(ref self: TContractState, amount: u256);
 }

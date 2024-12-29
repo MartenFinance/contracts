@@ -181,7 +181,7 @@ pub trait IVaultManager<TContractState> {
 
   fn get_vault_owners_count(self: @TContractState) -> u256;
 
-  fn get_vault_from_vault_owners_array(self: @TContractState, index: u256) -> u256;
+  fn get_vault_from_vault_owners_array(self: @TContractState, index: u256) -> ContractAddress;
 
   fn get_nominal_icr(self: @TContractState, borrower: ContractAddress) -> u256;
   fn get_current_icr(self: @TContractState, borrower: ContractAddress, price: u256) -> u256;

@@ -4,6 +4,7 @@ pub mod CollSurPlusPool {
   use starknet::storage::{Map, StorageMapReadAccess, StorageMapWriteAccess};
   use core::num::traits::Zero;
   use openzeppelin::access::ownable::OwnableComponent;
+  use marten::interfaces::coll_surplus_pool::ICollSurplusPool;
   use marten::interfaces::erc20::{IERC20Dispatcher, IERC20DispatcherTrait};
 
   component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
@@ -116,7 +117,7 @@ pub mod CollSurPlusPool {
     }
 
     fn account_surplus(ref self: ContractState, account: ContractAddress, amount: u256) {
-      self.require_caller_is_vault_manager()
+      self.require_caller_is_vault_manager();
 
       let new_amount: u256 = self.balances.read(account) + amount;
       self.balances.write(account, new_amount);
@@ -128,10 +129,10 @@ pub mod CollSurPlusPool {
       self.require_caller_is_borrower_operations();
 
       let claimable_coll: u256 = self.balances.read(account);
-      assert(claimable_coll > 0, "CSP:NO_COLLATERAL_AVAILABLE");
+      assert(claimable_coll > 0, 'CSP:NO_COLLATERAL_AVAILABLE');
 
       self.balances.write(account, 0);
-      self.emit(CollBalanceUpdate { account, new_balance: 0 });
+      self.emit(CollBalanceUpdated { account, new_balance: 0 });
 
       self.eth.write(self.eth.read() - claimable_coll);
       self.emit(EtherSent { to: account, amount: claimable_coll });
@@ -146,21 +147,21 @@ pub mod CollSurPlusPool {
   #[generate_trait]
   pub impl RequireFunctions of RequireFunctionsTrait {
     fn require_caller_is_borrower_operations(self: @ContractState) {
-      let caller_address = get_caller_address();
+      let caller = get_caller_address();
       let borrower_operations_address = self.borrower_operations_address.read();
-      assert(caller_address == borrower_operations_address, "CSP:CALLER_IS_NOT_BO");
+      assert(caller == borrower_operations_address, 'CSP:CALLER_IS_NOT_BO');
     }
 
-    fn require_caller_is_vault_manager() {
-      let caller_address = get_caller_address(self: @ContractState);
+    fn require_caller_is_vault_manager(self: @ContractState) {
+      let caller = get_caller_address();
       let vault_manager_address = self.vault_manager_address.read();
-      assert(caller_address == vault_manager_address, "CSP:CALLER_IS_NOT_VM");
+      assert(caller == vault_manager_address, 'CSP:CALLER_IS_NOT_VM');
     }
 
-    fn require_caller_is_active_pool() {
-      let caller_address = get_caller_address(self: @ContractState);
+    fn require_caller_is_active_pool(self: @ContractState) {
+      let caller = get_caller_address();
       let active_pool_address = self.active_pool_address.read();
-      assert(caller_address == active_pool_address, "CSP:CALLER_IS_NOT_AP");
+      assert(caller == active_pool_address, 'CSP:CALLER_IS_NOT_AP');
     }
   }
 }
