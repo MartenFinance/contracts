@@ -1,6 +1,6 @@
 #[starknet::contract]
 pub mod HintHelpers {
-  use starknet::{ContractAddress};
+  use starknet::ContractAddress;
   use core::keccak::keccak_u256s_be_inputs;
   use core::num::traits::Zero;
   use core::num::traits::Bounded;

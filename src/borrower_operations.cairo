@@ -394,9 +394,9 @@ pub mod BorrowerOperations {
   }
 
   #[generate_trait]
-  pub impl InternalFunctions of InternalFunctionsTrait {
+  impl InternalFunctions of InternalFunctionsTrait {
 
-    // --- 'require' fns ---
+    // --- 'require' functions ---
     fn require_singular_coll_change(self: @ContractState, eth_amount: u256, coll_withdrawal: u256) {
       assert(eth_amount == 0 || coll_withdrawal == 0, 'BO:SINGULAR_COL_CHANGE');
     }

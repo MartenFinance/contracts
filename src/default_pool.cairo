@@ -136,7 +136,7 @@ pub mod DefaultPool {
 
   // --- 'require' functions ---
   #[generate_trait]
-  pub impl RequireFunctions of RequireFunctionsTrait {
+  impl RequireFunctions of RequireFunctionsTrait {
     fn require_caller_is_vault_manager(self: @ContractState) {
       let caller_address = get_caller_address();
       let vault_manager_address = self.vault_manager_address.read();

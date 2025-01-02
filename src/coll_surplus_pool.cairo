@@ -145,7 +145,7 @@ pub mod CollSurPlusPool {
 
   // --- 'require' functions ---
   #[generate_trait]
-  pub impl RequireFunctions of RequireFunctionsTrait {
+  impl RequireFunctions of RequireFunctionsTrait {
     fn require_caller_is_borrower_operations(self: @ContractState) {
       let caller = get_caller_address();
       let borrower_operations_address = self.borrower_operations_address.read();

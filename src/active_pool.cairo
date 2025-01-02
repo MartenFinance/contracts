@@ -159,14 +159,14 @@ pub mod ActivePool {
 
   // --- 'require' functions ---
   #[generate_trait]
-  pub impl RequireFunctions of RequireFunctionsTrait {
+  impl RequireFunctions of RequireFunctionsTrait {
     // Caller is Borrower Operations or Default Pool
     fn require_caller_is_BO_or_DP(self: @ContractState) {
       let caller = get_caller_address();
       assert(
         caller == self.borrower_operations_address.read() ||
         caller == self.default_pool_address.read(),
-      'AP:CALLER_IS_BO_OR_DP');
+      'AP:CALLER_NOT_BO_DP');
     }
 
     // Caller is Borrower Operations or Vault Manager or Stability Pool
@@ -176,7 +176,7 @@ pub mod ActivePool {
         caller == self.borrower_operations_address.read() ||
         caller == self.vault_manager_address.read() ||
         caller == self.stability_pool_address.read(),
-      'AP:CALLER_IS_BO_OR_VM_OR_SP');
+      'AP:CALLER_NOT_BO_VM_SP');
     }
 
     // Caller is Borrower Operations or Vault Manager
@@ -185,7 +185,7 @@ pub mod ActivePool {
       assert(
         caller == self.borrower_operations_address.read() ||
         caller == self.vault_manager_address.read(),
-      'AP:CALLER_IS_BO_OR_VM');
+      'AP:CALLER_NOT_BO_VM');
     }
   }
 }

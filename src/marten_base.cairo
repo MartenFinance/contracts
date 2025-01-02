@@ -1,6 +1,6 @@
 #[starknet::contract]
 pub mod MartenBase {
-  use starknet::{ContractAddress};
+  use starknet::ContractAddress;
   use OwnableComponent::InternalTrait;
   use core::num::traits::Zero;
   use openzeppelin::access::ownable::OwnableComponent;

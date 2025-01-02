@@ -26,3 +26,4 @@ pub mod gas_pool;
 pub mod hint_helpers;
 pub mod marten_base;
 pub mod marten_math;
+pub mod usdm_token;
