@@ -26,5 +26,6 @@ pub mod gas_pool;
 pub mod hint_helpers;
 pub mod marten_base;
 pub mod marten_math;
-pub mod multi_vault_getter;
-pub mod usdm_token;
+// pub mod multi_vault_getter;
+pub mod price_feed;
+// pub mod usdm_token;

@@ -57,14 +57,15 @@ pub mod MultiVaultGetter {
       let sorted_vaults_contract: ISortedVaultsDispatcher = ISortedVaultsDispatcher { contract_address: self.sorted_vaults_address.read() };
       let mut current_vault_owner = sorted_vaults_contract.get_first();
 
-
       let mut i: u256 = 0;
       loop {
-        if (i == count - 1) {
+        if (i == start_index - 1) {
           break;
         };
 
         current_vault_owner = sorted_vaults_contract.get_next(current_vault_owner);
+
+        i = i + 1;
       };
 
       let vaults = ArrayTrait::<CombinedVaultData>::new();
@@ -76,6 +77,8 @@ pub mod MultiVaultGetter {
         };
 
         // let vault = vault_manager_contract.
+
+        j = j + 1;
       };
 
       return vaults;
